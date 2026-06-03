@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Admin — Kotaaans</title>
+<meta name="robots" content="noindex, nofollow"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0a0a0a; --bg2:#111111; --bg3:#181818;
+  --text:#f0ece4; --muted:#7a7468; --muted2:#b8b2a6;
+  --accent:#c9a7ff; --accent2:#8f4dff;
+  --gold:#e8c96d;
+  --line:rgba(255,255,255,0.07); --line2:rgba(255,255,255,0.13);
+  --ok:rgba(74,222,128,1); --ok-bg:rgba(74,222,128,0.1);
+  --err:#f87171; --err-bg:rgba(248,113,113,0.1);
+}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;line-height:1.6;}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--accent2);border-radius:3px;}
+
+/* ── AUTH ── */
+#auth-page{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;padding:24px;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(143,77,255,.18) 0%,transparent 60%),var(--bg);
+}
+.auth-card{
+  background:var(--bg2);border:1px solid var(--line2);
+  border-radius:20px;padding:44px 40px;max-width:380px;width:100%;
+  box-shadow:0 32px 80px rgba(0,0,0,.6);
+}
+.auth-logo{
+  font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:0.04em;
+  color:var(--text);text-align:center;line-height:1;margin-bottom:2px;
+}
+.auth-sub{font-size:10px;letter-spacing:0.3em;text-transform:uppercase;color:var(--muted);text-align:center;margin-bottom:32px;}
+.field{margin-bottom:14px;}
+.field label{display:block;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;font-weight:700;color:var(--muted);margin-bottom:7px;}
+.field input,.field textarea{
+  width:100%;border:1px solid var(--line2);border-radius:10px;
+  padding:12px 15px;font-size:14px;font-family:inherit;color:var(--text);
+  background:var(--bg3);outline:none;transition:border .2s;
+}
+.field input:focus,.field textarea:focus{border-color:var(--accent);}
+.field textarea{resize:vertical;min-height:80px;}
+.sbtn{
+  width:100%;background:var(--accent);color:#0a0a0a;border:none;
+  border-radius:999px;padding:14px;font-size:13px;font-weight:700;
+  letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;
+  font-family:inherit;transition:transform .2s,box-shadow .2s;margin-top:6px;
+}
+.sbtn:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 8px 28px rgba(201,167,255,.35);}
+.sbtn:disabled{opacity:.4;}
+.msg-err{background:var(--err-bg);color:var(--err);border-radius:10px;padding:12px 15px;font-size:13px;margin-top:8px;}
+.msg-ok{background:var(--ok-bg);color:var(--ok);border-radius:10px;padding:12px 15px;font-size:13px;margin-top:8px;display:flex;align-items:center;gap:8px;}
+
+/* ── PANEL ── */
+#panel-page{display:none;min-height:100vh;flex-direction:column;}
+.panel-header{
+  background:var(--bg2);border-bottom:1px solid var(--line);
+  padding:0 40px;display:flex;align-items:center;justify-content:space-between;
+  height:58px;position:sticky;top:0;z-index:100;
+}
+.panel-logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.04em;color:var(--text);}
+.panel-logo span{font-size:9px;font-family:'DM Sans',sans-serif;letter-spacing:0.2em;text-transform:uppercase;color:var(--muted);margin-left:10px;font-weight:400;}
+.logout-btn{
+  background:transparent;color:var(--muted2);border:1px solid var(--line2);
+  border-radius:999px;padding:7px 16px;font-size:12px;font-weight:500;
+  cursor:pointer;font-family:inherit;transition:.2s;
+}
+.logout-btn:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ── TABS ── */
+.panel-tabs{
+  display:flex;border-bottom:1px solid var(--line);
+  background:var(--bg2);padding:0 40px;position:sticky;top:58px;z-index:99;
+}
+.ptab{
+  background:none;border:none;border-bottom:2px solid transparent;
+  padding:14px 20px;font-size:11px;font-weight:700;letter-spacing:0.15em;
+  text-transform:uppercase;color:var(--muted);cursor:pointer;font-family:inherit;
+  transition:.2s;margin-bottom:-1px;
+}
+.ptab:hover{color:var(--text);}
+.ptab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* ── LAYOUT ── */
+.tab-body{padding:36px 40px;max-width:1160px;margin:0 auto;width:100%;}
+
+/* ── CARDS ── */
+.card{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:28px;}
+.card-title{
+  font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.04em;
+  color:var(--text);margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:10px;
+}
+.pill{background:var(--accent2);color:#fff;border-radius:999px;font-size:10px;padding:2px 10px;font-weight:700;font-family:'DM Sans',sans-serif;}
+
+/* ── TWO COL ── */
+.two-col{display:grid;grid-template-columns:380px 1fr;gap:28px;align-items:start;}
+@media(max-width:860px){.two-col{grid-template-columns:1fr;}.tab-body{padding:20px;}.panel-header,.panel-tabs{padding:0 20px;}}
+
+/* ── UPLOAD ── */
+.upload-box{
+  border:1.5px dashed rgba(201,167,255,.3);border-radius:12px;
+  padding:22px;text-align:center;cursor:pointer;transition:all .2s;
+  margin-bottom:14px;background:var(--bg3);
+}
+.upload-box:hover,.upload-box.drag{border-color:var(--accent);background:rgba(201,167,255,.06);}
+.upload-box input{display:none;}
+.upload-icon{font-size:30px;margin-bottom:6px;}
+.upload-hint{font-size:12px;color:var(--muted);}
+
+/* ── PRODUCT LIST ── */
+.prod-list{display:flex;flex-direction:column;gap:8px;max-height:580px;overflow-y:auto;}
+.prow{
+  display:flex;align-items:center;gap:12px;
+  background:var(--bg3);border:1px solid var(--line);border-radius:12px;
+  padding:11px 14px;transition:border-color .2s;
+}
+.prow:hover{border-color:var(--line2);}
+.pthumb{
+  width:46px;height:46px;border-radius:9px;background:var(--bg2);
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+  flex-shrink:0;overflow:hidden;
+}
+.pthumb img{width:100%;height:100%;object-fit:cover;border-radius:9px;}
+.pinfo{flex:1;min-width:0;}
+.pname{font-weight:600;font-size:14px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pprice{font-size:12px;color:var(--muted);margin-top:1px;}
+.dbtn{background:none;border:none;font-size:16px;cursor:pointer;padding:6px;border-radius:8px;transition:background .15s;line-height:1;flex-shrink:0;}
+.dbtn:hover{background:var(--err-bg);}
+
+/* ── PORTFOLIO GRID ── */
+.port-grid{
+  display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px;
+}
+@media(max-width:700px){.port-grid{grid-template-columns:repeat(3,1fr);}}
+.port-item{
+  position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;
+  border:1.5px solid var(--line);cursor:grab;user-select:none;transition:border-color .2s,transform .15s;
+}
+.port-item:active{cursor:grabbing;}
+.port-item.dragging{opacity:.35;}
+.port-item.drag-over{border-color:var(--accent);transform:scale(1.04);}
+.port-item img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;}
+.port-del{
+  position:absolute;top:5px;right:5px;background:rgba(10,10,10,.8);color:var(--text);
+  border:none;border-radius:50%;width:26px;height:26px;cursor:pointer;
+  font-size:12px;display:flex;align-items:center;justify-content:center;transition:background .15s;
+}
+.port-del:hover{background:var(--err-bg);color:var(--err);}
+.port-replace{
+  position:absolute;bottom:5px;left:50%;transform:translateX(-50%);
+  background:rgba(10,10,10,.8);color:var(--accent);border:none;
+  border-radius:6px;padding:3px 9px;cursor:pointer;font-size:10px;
+  font-weight:700;letter-spacing:.5px;font-family:inherit;white-space:nowrap;transition:background .15s;
+}
+.port-replace:hover{background:rgba(143,77,255,.4);}
+.port-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+
+/* ── SPINNER ── */
+.spinner{width:20px;height:20px;border:2px solid var(--line2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── TOAST ── */
+#toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(70px);
+  background:var(--bg2);color:var(--text);border:1px solid var(--line2);
+  border-radius:999px;padding:11px 24px;font-size:13px;font-weight:500;
+  z-index:9900;transition:transform .35s cubic-bezier(.34,1.56,.64,1);
+  pointer-events:none;white-space:nowrap;box-shadow:0 8px 32px rgba(0,0,0,.5);
+}
+#toast.show{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div id="toast"></div>
+
+<div id="auth-page">
+  <div class="auth-card">
+    <div class="auth-logo">Kotaaans</div>
+    <div class="auth-sub">Admin Panel</div>
+    <div class="field"><label>Email</label><input id="a-email" type="email" placeholder="admin@kotaaans.lv"/></div>
+    <div class="field"><label>Parole</label><input id="a-pass" type="password" placeholder="••••••••••"/></div>
+    <div id="auth-err" class="msg-err" style="display:none;"></div>
+    <button class="sbtn" id="login-btn">Ieiet</button>
+  </div>
+</div>
+
+<div id="panel-page" style="display:flex;flex-direction:column;">
+  <div class="panel-header">
+    <div class="panel-logo">Kotaaans <span>Admin</span></div>
+    <button class="logout-btn" id="logout-btn">Iziet</button>
+  </div>
+
+  <div class="panel-tabs">
+    <button class="ptab active" id="btn-tab-products">Pakalpojumi</button>
+    <button class="ptab"        id="btn-tab-portfolio">Portfelis</button>
+  </div>
+
+  <div id="sec-products" class="tab-body">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title" id="form-title">Pievienot pakalpojumu</div>
+        <input type="hidden" id="edit-id"/>
+
+        <div class="field"><label>Nosaukums *</label><input id="f-name" type="text" placeholder="Fade griezums"/></div>
+        <div class="field"><label>Apraksts</label><textarea id="f-desc" placeholder="Apraksti stilu vai kopšanas padomus..." style="width:100%;border:1px solid var(--line2);border-radius:10px;padding:12px 15px;font-size:14px;font-family:inherit;color:var(--text);background:var(--bg3);outline:none;resize:vertical;min-height:90px;transition:border .2s;"></textarea></div>
+
+        <div class="field">
+          <label>Foto (neobligāts)</label>
+          <div class="upload-box" id="svc-upload-box" style="padding:12px;margin-bottom:0;text-align:left;">
+            <input type="file" id="svc-img-file" accept="image/*" style="display:none"/>
+            <div id="svc-img-preview" style="display:none;position:relative;margin-bottom:8px;">
+              <img id="svc-preview-img" src="" alt="" style="width:100%;border-radius:8px;max-height:140px;object-fit:cover;display:block;"/>
+              <button type="button" id="svc-clear-img" style="position:absolute;top:4px;right:4px;background:rgba(10,10,10,.85);color:var(--text);border:none;border-radius:50%;width:24px;height:24px;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;">✕</button>
+            </div>
+            <div id="svc-img-hint" style="text-align:center;">
+              <div style="font-size:22px;margin-bottom:3px;">📷</div>
+              <div class="upload-hint">Klikšķis vai velc foto</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="form-err" class="msg-err" style="display:none;"></div>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <button class="sbtn" id="save-btn" style="flex:1;">Pievienot</button>
+          <button id="cancel-btn" style="display:none;background:none;border:1px solid var(--line2);color:var(--muted2);border-radius:999px;padding:13px 18px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:.2s;">Atcelt</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Pakalpojumi <span class="pill" id="prod-count">0</span></div>
+        <div class="prod-list" id="prod-list">
+          <div style="text-align:center;padding:32px;"><div class="spinner" style="margin:0 auto;"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sec-portfolio" style="display:none;">
+    <div class="tab-body">
+      <div class="card">
+        <div class="card-title">Portfelis</div>
+
+        <div class="upload-box" id="port-upload" style="margin-bottom:20px;">
+          <input type="file" id="port-file" accept="image/*" multiple/>
+          <div class="upload-icon">📷</div>
+          <div class="upload-hint">
+            Pievienot foto — klikšķis vai drag &amp; drop<br/>
+            <span style="font-size:11px;opacity:.6;">Var izvēlēties vairākus vienlaikus · jebkurš izmērs</span>
+          </div>
+        </div>
+
+        <div id="port-progress" style="display:none;margin-bottom:12px;font-size:13px;color:var(--accent);font-weight:600;"></div>
+
+        <div id="port-grid" class="port-grid"></div>
+        <input type="file" id="port-replace-file" accept="image/*" style="display:none"/>
+
+        <div class="port-actions">
+          <button class="sbtn" id="btn-save-order" style="width:auto;padding:12px 28px;">Saglabāt kārtību</button>
+          <span id="port-order-msg" style="display:none;color:var(--ok);font-weight:600;font-size:13px;">✓ Kārtība saglabāta</span>
+        </div>
+        <div id="port-err" class="msg-err" style="display:none;margin-top:12px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script nonce="%%NONCE%%">
+let authToken = sessionStorage.getItem('ac_token') || null;
+let pendingSvcImg = null;
+let _portPhotos = [];
+let _replaceId = null;
+let _dragSrc = null;
+
+async function api(method, path, body) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  if (authToken) opts.headers['Authorization'] = 'Bearer ' + authToken;
+  if (body) opts.body = JSON.stringify(body);
+  let res;
+  try { res = await fetch(path, opts); }
+  catch { throw new Error('Nav savienojuma ar serveri'); }
+  if (res.status === 401 && authToken) {
+    const rt = sessionStorage.getItem('ac_refresh');
+    if (rt) {
+      try {
+        const rr = await fetch('/api/auth/refresh', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ refresh_token: rt }) });
+        const rd = await rr.json();
+        if (rd.token) {
+          authToken = rd.token;
+          sessionStorage.setItem('ac_token', authToken);
+          if (sessionStorage.getItem('ac_refresh') && rd.refresh_token) sessionStorage.setItem('ac_refresh', rd.refresh_token);
+          opts.headers['Authorization'] = 'Bearer ' + authToken;
+          res = await fetch(path, opts);
+        } else {
+          doLogout(); throw new Error('Sesija beidzās');
+        }
+      } catch (err) { if (err.message === 'Sesija beidzās') throw err; doLogout(); throw new Error('Sesija beidzās'); }
+    } else { doLogout(); throw new Error('Sesija beidzās'); }
+  }
+  let data;
+  try { data = await res.json(); } catch { throw new Error(`Servera kļūda (${res.status})`); }
+  if (!res.ok) throw new Error(data.error || 'Kļūda');
+  return data;
+}
+
+function esc(s) { const d = document.createElement('div'); d.textContent = String(s); return d.innerHTML; }
+function toast(msg) { const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('show'); setTimeout(() => el.classList.remove('show'), 3000); }
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = ev => resolve(ev.target.result);
+    r.onerror = reject;
+    r.readAsDataURL(file);
+  });
+}
+
+document.getElementById('login-btn').addEventListener('click', doLogin);
+document.getElementById('a-pass').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+document.getElementById('logout-btn').addEventListener('click', doLogout);
+
+async function doLogin() {
+  const email = document.getElementById('a-email').value.trim();
+  const pass  = document.getElementById('a-pass').value;
+  const errEl = document.getElementById('auth-err');
+  const btn   = document.getElementById('login-btn');
+  if (!email || !pass) { errEl.textContent = 'Ievadiet email un paroli.'; errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none'; btn.disabled = true; btn.textContent = '…';
+  try {
+    const data = await api('POST', '/api/auth/login', { email, password: pass });
+    authToken = data.token;
+    sessionStorage.setItem('ac_token', authToken);
+    if (data.refresh_token) sessionStorage.setItem('ac_refresh', data.refresh_token);
+    showPanel();
+  } catch (e) { errEl.textContent = e.message; errEl.style.display = 'block'; }
+  finally { btn.disabled = false; btn.textContent = 'Ieiet'; }
+}
+
+function doLogout() {
+  authToken = null;
+  sessionStorage.removeItem('ac_token');
+  sessionStorage.removeItem('ac_refresh');
+  document.getElementById('auth-page').style.display = 'flex';
+  document.getElementById('panel-page').style.display = 'none';
+}
+
+function showPanel() {
+  document.getElementById('auth-page').style.display = 'none';
+  document.getElementById('panel-page').style.display = 'flex';
+  showTab('products');
+  loadProducts();
+}
+
+if (authToken) showPanel();
+
+document.getElementById('btn-tab-products').addEventListener('click', () => showTab('products'));
+document.getElementById('btn-tab-portfolio').addEventListener('click', () => showTab('portfolio'));
+
+function showTab(name) {
+  document.getElementById('sec-products').style.display  = name === 'products'  ? 'block' : 'none';
+  document.getElementById('sec-portfolio').style.display = name === 'portfolio' ? 'block' : 'none';
+  document.getElementById('btn-tab-products').classList.toggle('active',  name === 'products');
+  document.getElementById('btn-tab-portfolio').classList.toggle('active', name === 'portfolio');
+  if (name === 'portfolio') loadPortfolio();
+}
+
+let _svcs = [];
+
+async function loadProducts() { 
+  const list = document.getElementById('prod-list');
+  list.innerHTML = '<div style="text-align:center;padding:28px;"><div class="spinner" style="margin:0 auto;"></div></div>';
+  try {
+    _svcs = await api('GET', '/api/services');
+    renderSvcList();
+  } catch (e) { list.innerHTML = `<div class="msg-err">${esc(e.message)}</div>`; }
+}
+
+function renderSvcList() {
+  const list = document.getElementById('prod-list');
+  document.getElementById('prod-count').textContent = _svcs.length;
+  if (!_svcs.length) { list.innerHTML = '<div style="text-align:center;padding:36px;color:var(--muted);">Nav pakalpojumu</div>'; return; }
+  list.innerHTML = '';
+  _svcs.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'prow';
+    row.innerHTML = `
+      <div class="pthumb" data-thumb></div>
+      <div class="pinfo">
+        <div class="pname">${esc(s.name)}</div>
+        <div class="pprice" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(s.description || '')}</div>
+      </div>
+      <button class="dbtn" data-action="edit" data-id="${Number(s.id)}">✏️</button>
+      <button class="dbtn" data-action="del"  data-id="${Number(s.id)}">🗑️</button>
+    `;
+    const thumb = row.querySelector('[data-thumb]');
+    if (s.img_url) {
+      const img = document.createElement('img');
+      img.src = s.img_url;
+      thumb.appendChild(img);
+    } else {
+      thumb.style.fontSize = '22px';
+      thumb.textContent = '✂️';
+    }
+    list.appendChild(row);
+  });
+}
+
+document.getElementById('prod-list').addEventListener('click', e => {
+  const btn = e.target.closest('[data-action]');
+  if (!btn) return;
+  const id = parseInt(btn.dataset.id);
+  if (btn.dataset.action === 'edit') startEdit(id);
+  if (btn.dataset.action === 'del')  deleteService(id);
+});
+
+function startEdit(id) {
+  const s = _svcs.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('edit-id').value = id;
+  document.getElementById('f-name').value  = s.name || '';
+  document.getElementById('f-desc').value  = s.description || '';
+  if (s.img_url) {
+    pendingSvcImg = s.img_url;
+    document.getElementById('svc-preview-img').src = s.img_url;
+    document.getElementById('svc-img-preview').style.display = 'block';
+    document.getElementById('svc-img-hint').style.display = 'none';
+  } else {
+    clearSvcImg();
+  }
+  document.getElementById('form-title').textContent = 'Rediģēt pakalpojumu';
+  document.getElementById('save-btn').textContent   = 'Saglabāt';
+  document.getElementById('cancel-btn').style.display = 'block';
+  document.getElementById('form-err').style.display   = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('cancel-btn').addEventListener('click', resetForm);
+function resetForm() {
+  document.getElementById('edit-id').value = '';
+  ['f-name','f-desc'].forEach(id => document.getElementById(id).value = '');
+  clearSvcImg();
+  document.getElementById('form-title').textContent = 'Pievienot pakalpojumu';
+  document.getElementById('save-btn').textContent   = 'Pievienot';
+  document.getElementById('cancel-btn').style.display = 'none';
+  document.getElementById('form-err').style.display   = 'none';
+}
+
+const svcBox = document.getElementById('svc-upload-box');
+svcBox.addEventListener('click', e => { if (!e.target.closest('#svc-clear-img')) document.getElementById('svc-img-file').click(); });
+svcBox.addEventListener('dragover',  e => { e.preventDefault(); svcBox.classList.add('drag'); });
+svcBox.addEventListener('dragleave', () => svcBox.classList.remove('drag'));
+svcBox.addEventListener('drop', e => { e.preventDefault(); svcBox.classList.remove('drag'); if (e.dataTransfer.files[0]) setSvcImg(e.dataTransfer.files[0]); });
+document.getElementById('svc-img-file').addEventListener('change', function() { if (this.files[0]) setSvcImg(this.files[0]); this.value = ''; });
+document.getElementById('svc-clear-img').addEventListener('click', e => { e.stopPropagation(); clearSvcImg(); });
+
+function setSvcImg(file) {
+  pendingSvcImg = file;
+  const r = new FileReader();
+  r.onload = ev => {
+    document.getElementById('svc-preview-img').src = ev.target.result;
+    document.getElementById('svc-img-preview').style.display = 'block';
+    document.getElementById('svc-img-hint').style.display = 'none';
+  };
+  r.readAsDataURL(file);
+}
+
+function clearSvcImg() {
+  pendingSvcImg = null;
+  document.getElementById('svc-preview-img').src = '';
+  document.getElementById('svc-img-preview').style.display = 'none';
+  document.getElementById('svc-img-hint').style.display = 'block';
+}
+
+document.getElementById('save-btn').addEventListener('click', saveService);
+async function saveService() {
+  const editId = document.getElementById('edit-id').value;
+  const name   = document.getElementById('f-name').value.trim();
+  const desc   = document.getElementById('f-desc').value.trim();
+  const errEl  = document.getElementById('form-err');
+  const btn    = document.getElementById('save-btn');
+  if (!name) { errEl.textContent = 'Ievadiet nosaukumu.'; errEl.style.display = 'block'; return; }
+  errEl.style.display = 'none'; btn.disabled = true; btn.textContent = '…';
+  const body = { name, description: desc };
+  if (pendingSvcImg) {
+    if (typeof pendingSvcImg === 'string') {
+      body.img_url = pendingSvcImg;
+    } else {
+      try { body.img_base64 = await fileToBase64(pendingSvcImg); }
+      catch (e) {
+        errEl.textContent = 'Foto kļūda: ' + e.message; errEl.style.display = 'block';
+        btn.disabled = false; btn.textContent = editId ? 'Saglabāt' : 'Pievienot'; return;
+      }
+    }
+  } else {
+    body.img_url = null;
+  }
+  try {
+    if (editId) {
+      await api('PATCH', `/api/services/${editId}`, body);
+      toast('Saglabāts ✓');
+    } else {
+      await api('POST', '/api/services', body);
+      toast('Pievienots ✓');
+    }
+    resetForm(); await loadProducts();
+  } catch (e) { errEl.textContent = e.message; errEl.style.display = 'block'; }
+  finally { btn.disabled = false; btn.textContent = editId ? 'Saglabāt' : 'Pievienot'; }
+}
+
+async function deleteService(id) {
+  if (!confirm('Dzēst šo pakalpojumu?')) return;
+  try { await api('DELETE', `/api/services/${id}`); await loadProducts(); toast('Dzēsts'); }
+  catch (e) { toast('Kļūda: ' + e.message); }
+}
+
+async function loadPortfolio() {
+  const grid = document.getElementById('port-grid');
+  grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:28px;"><div class="spinner" style="margin:0 auto;"></div></div>';
+  try {
+    _portPhotos = await api('GET', '/api/portfolio');
+    renderPortGrid();
+  } catch (e) {
+    grid.innerHTML = `<div class="msg-err" style="grid-column:1/-1;">${esc(e.message)}</div>`;
+  }
+}
+
+function renderPortGrid() {
+  const grid = document.getElementById('port-grid');
+  grid.innerHTML = '';
+  if (!_portPhotos.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:32px;color:var(--muted);">Foto vēl nav — augšupielādē pirmo!</div>';
+    return;
+  }
+  _portPhotos.forEach(p => grid.appendChild(makePortItem(p)));
+}
+
+function makePortItem(p) {
+  const item = document.createElement('div');
+  item.className = 'port-item';
+  item.dataset.id = p.id;
+
+  const img = document.createElement('img');
+  img.src = p.img_url; img.alt = '';
+  item.appendChild(img);
+
+  const del = document.createElement('button');
+  del.className = 'port-del'; del.title = 'Dzēst'; del.textContent = '✕';
+  del.addEventListener('click', e => { e.stopPropagation(); deletePortPhoto(p.id, item); });
+  item.appendChild(del);
+
+  const rep = document.createElement('button');
+  rep.className = 'port-replace'; rep.textContent = 'Mainīt';
+  rep.addEventListener('click', e => { e.stopPropagation(); _replaceId = p.id; document.getElementById('port-replace-file').click(); });
+  item.appendChild(rep);
+
+  item.setAttribute('draggable', 'true');
+  item.addEventListener('dragstart', e => { _dragSrc = item; e.dataTransfer.effectAllowed = 'move'; setTimeout(() => item.classList.add('dragging'), 0); });
+  item.addEventListener('dragend',   () => { item.classList.remove('dragging'); document.querySelectorAll('.port-item').forEach(i => i.classList.remove('drag-over')); });
+  item.addEventListener('dragover',  e => { e.preventDefault(); document.querySelectorAll('.port-item').forEach(i => i.classList.remove('drag-over')); if (item !== _dragSrc) item.classList.add('drag-over'); });
+  item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+  item.addEventListener('drop', e => {
+    e.preventDefault(); item.classList.remove('drag-over');
+    if (_dragSrc && item !== _dragSrc) {
+      const all = [...document.getElementById('port-grid').querySelectorAll('.port-item')];
+      const si = all.indexOf(_dragSrc), di = all.indexOf(item);
+      if (si < di) document.getElementById('port-grid').insertBefore(_dragSrc, item.nextSibling);
+      else         document.getElementById('port-grid').insertBefore(_dragSrc, item);
+    }
+  });
+  return item;
+}
+
+async function deletePortPhoto(id, el) {
+  if (!confirm('Dzēst šo foto?')) return;
+  try {
+    await api('DELETE', `/api/portfolio/${id}`);
+    el.remove(); _portPhotos = _portPhotos.filter(p => p.id !== id);
+    if (!document.querySelectorAll('.port-item').length) renderPortGrid();
+    toast('Foto dzēsts');
+  } catch (e) { toast('Kļūda: ' + e.message); }
+}
+
+document.getElementById('port-replace-file').addEventListener('change', async function() {
+  const file = this.files[0]; this.value = '';
+  if (!file || !_replaceId) return;
+  const item = document.getElementById('port-grid').querySelector(`[data-id="${_replaceId}"]`);
+  if (!item) return;
+  try {
+    const b64 = await fileToBase64(file);
+    const data = await api('PATCH', `/api/portfolio/${_replaceId}`, { img_base64: b64 });
+    item.querySelector('img').src = data.img_url + '?t=' + Date.now();
+    const idx = _portPhotos.findIndex(p => p.id === _replaceId);
+    if (idx >= 0) _portPhotos[idx].img_url = data.img_url;
+    toast('Foto nomainīts ✓');
+  } catch (e) { toast('Kļūda: ' + e.message); }
+  _replaceId = null;
+});
+
+const portUpload = document.getElementById('port-upload');
+portUpload.addEventListener('click', () => document.getElementById('port-file').click());
+portUpload.addEventListener('dragover', e => { e.preventDefault(); portUpload.classList.add('drag'); });
+portUpload.addEventListener('dragleave', () => portUpload.classList.remove('drag'));
+portUpload.addEventListener('drop', e => { e.preventDefault(); portUpload.classList.remove('drag'); uploadPortFiles(e.dataTransfer.files); });
+document.getElementById('port-file').addEventListener('change', function() { uploadPortFiles(this.files); this.value = ''; });
+
+async function uploadPortFiles(files) {
+  const arr = [...files].filter(f => f.type.startsWith('image/'));
+  if (!arr.length) return;
+  const progress = document.getElementById('port-progress');
+  const errEl    = document.getElementById('port-err');
+  errEl.style.display = 'none'; progress.style.display = 'block';
+  const grid = document.getElementById('port-grid');
+  if (!grid.querySelector('.port-item')) grid.innerHTML = '';
+  let ok = 0;
+  for (let i = 0; i < arr.length; i++) {
+    progress.textContent = `Augšupielādē ${i + 1} / ${arr.length}…`;
+    try {
+      const b64  = await fileToBase64(arr[i]);
+      const data = await api('POST', '/api/portfolio', { img_base64: b64 });
+      _portPhotos.push(data);
+      grid.appendChild(makePortItem(data));
+      ok++;
+    } catch (e) { errEl.textContent = `Kļūda (${arr[i].name}): ${e.message}`; errEl.style.display = 'block'; }
+  }
+  progress.style.display = 'none';
+  if (ok) toast(`Pievienots ${ok} foto ✓`);
+}
+
+document.getElementById('btn-save-order').addEventListener('click', async () => {
+  const items = [...document.querySelectorAll('.port-item')];
+  const order = items.map((el, i) => ({ id: parseInt(el.dataset.id), sort_order: i }));
+  const btn = document.getElementById('btn-save-order');
+  btn.disabled = true; btn.textContent = '…';
+  try {
+    await api('PATCH', '/api/portfolio/reorder', { order });
+    const msg = document.getElementById('port-order-msg');
+    msg.style.display = 'inline';
+    setTimeout(() => msg.style.display = 'none', 2500);
+    toast('Kārtība saglabāta ✓');
+  } catch (e) { toast('Kļūda: ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = 'Saglabāt kārtību'; }
+});
+
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+[Unit]
+Description=Kotaaans Barbershop Node.js Server
+After=network.target
+
+[Service]
+Type=simple
+User=kotaaans
+WorkingDirectory=/srv/kotaaans
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=5
+EnvironmentFile=/srv/kotaaans/.env
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=kotaaans
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/srv/kotaaans
+
+[Install]
+WantedBy=multi-user.target
