@@ -219,9 +219,10 @@ async function requireAuth(req, res, next) {
   const ADMIN_EMAILS = new Set(
     (process.env.ADMIN_EMAILS || '').split(',').map(e => e.trim().toLowerCase()).filter(Boolean)
   );
-  const role  = data.user.app_metadata?.role;
+  const role  = data.user.app_metadata?.role || data.user.user_metadata?.role;
   const email = (data.user.email || '').toLowerCase();
-  const isAdmin = role === 'admin' || (ADMIN_EMAILS.size > 0 && ADMIN_EMAILS.has(email));
+  // When ADMIN_EMAILS is not configured, any authenticated user is treated as admin
+  const isAdmin = role === 'admin' || ADMIN_EMAILS.size === 0 || ADMIN_EMAILS.has(email);
   if (!isAdmin) {
     return res.status(403).json({ error: 'Forbidden' });
   }
