@@ -9,13 +9,18 @@ async function loadPortfolio() {
     masonry.innerHTML = '';
     photos.forEach((p, i) => {
       const fig = document.createElement('figure');
-      
       fig.className = 'm-item' + (i % 3 === 0 ? ' m-tall' : '');
       const img = document.createElement('img');
       img.src = p.img_url;
-      img.alt = '';
+      img.alt = p.author ? 'by ' + p.author : '';
       img.loading = 'lazy';
       fig.appendChild(img);
+      if (p.author) {
+        const cap = document.createElement('figcaption');
+        cap.className = 'm-author';
+        cap.textContent = p.author;
+        fig.appendChild(cap);
+      }
       masonry.appendChild(fig);
     });
   } catch {}

@@ -261,7 +261,7 @@ app.get('/api/portfolio', async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('portfolio_photos')
-      .select('id, img_url, sort_order')
+      .select('id, img_url, sort_order, author')
       .order('sort_order', { ascending: true });
     if (error) {
       console.error('[portfolio GET]', error.message);
@@ -275,7 +275,7 @@ app.get('/api/portfolio', async (req, res) => {
 });
 
 app.post('/api/portfolio', requireAuth, async (req, res) => {
-  const { img_url, img_base64 } = req.body;
+  const { img_url, img_base64, author } = req.body;
   let safeUrl;
   if (img_base64) {
     safeUrl = await uploadImage(img_base64, MAX_PORTFOLIO_BYTES);
@@ -288,7 +288,7 @@ app.post('/api/portfolio', requireAuth, async (req, res) => {
     .from('portfolio_photos').select('sort_order').order('sort_order', { ascending: false }).limit(1);
   const nextOrder = last?.length ? last[0].sort_order + 1 : 0;
   const { data, error } = await supabaseAdmin
-    .from('portfolio_photos').insert([{ img_url: safeUrl, sort_order: nextOrder }]).select().single();
+    .from('portfolio_photos').insert([{ img_url: safeUrl, sort_order: nextOrder, author: sanitise(author || '', 100) }]).select().single();
   if (error) {
     console.error(error.message);
     return res.status(500).json({ error: 'Internal server error' });
@@ -314,17 +314,21 @@ app.patch('/api/portfolio/reorder', requireAuth, async (req, res) => {
 app.patch('/api/portfolio/:id', requireAuth, async (req, res) => {
   const id = parseId(req.params.id);
   if (!id) return res.status(400).json({ error: 'Invalid ID' });
-  const { img_url, img_base64 } = req.body;
-  let safeUrl;
+  const { img_url, img_base64, author } = req.body;
+  const updates = {};
   if (img_base64) {
-    safeUrl = await uploadImage(img_base64, MAX_PORTFOLIO_BYTES);
+    const safeUrl = await uploadImage(img_base64, MAX_PORTFOLIO_BYTES);
     if (!safeUrl) return res.status(400).json({ error: 'Invalid or oversized image' });
-  } else {
-    safeUrl = sanitiseUrl(img_url);
+    updates.img_url = safeUrl;
+  } else if (img_url !== undefined) {
+    const safeUrl = sanitiseUrl(img_url);
     if (!safeUrl) return res.status(400).json({ error: 'Invalid URL' });
+    updates.img_url = safeUrl;
   }
+  if (author !== undefined) updates.author = sanitise(author, 100);
+  if (!Object.keys(updates).length) return res.status(400).json({ error: 'Nothing to update' });
   const { data, error } = await supabaseAdmin
-    .from('portfolio_photos').update({ img_url: safeUrl }).eq('id', id).select().single();
+    .from('portfolio_photos').update(updates).eq('id', id).select().single();
   if (error) {
     console.error(error.message);
     return res.status(500).json({ error: 'Internal server error' });

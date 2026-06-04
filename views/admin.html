@@ -140,13 +140,15 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM
 }
 @media(max-width:700px){.port-grid{grid-template-columns:repeat(3,1fr);}}
 .port-item{
-  position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;
-  border:1.5px solid var(--line);cursor:grab;user-select:none;transition:border-color .2s,transform .15s;
+  position:relative;border-radius:10px;overflow:hidden;
+  border:1.5px solid var(--line);cursor:grab;user-select:none;
+  transition:border-color .2s,transform .15s;display:flex;flex-direction:column;
 }
 .port-item:active{cursor:grabbing;}
 .port-item.dragging{opacity:.35;}
 .port-item.drag-over{border-color:var(--accent);transform:scale(1.04);}
-.port-item img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;}
+.port-item-img{position:relative;aspect-ratio:1;overflow:hidden;flex-shrink:0;}
+.port-item-img img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;}
 .port-del{
   position:absolute;top:5px;right:5px;background:rgba(10,10,10,.8);color:var(--text);
   border:none;border-radius:50%;width:26px;height:26px;cursor:pointer;
@@ -160,6 +162,15 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM
   font-weight:700;letter-spacing:.5px;font-family:inherit;white-space:nowrap;transition:background .15s;
 }
 .port-replace:hover{background:rgba(143,77,255,.4);}
+.port-author{
+  width:100%;box-sizing:border-box;background:var(--bg2);color:var(--muted2);
+  border:none;border-top:1px solid var(--line);padding:5px 8px;
+  font-size:10px;font-family:inherit;outline:none;
+}
+.port-author::placeholder{color:var(--muted);}
+.port-author:focus{background:rgba(255,255,255,0.04);color:var(--text);}
+.port-author.saving{color:var(--accent);}
+.port-author.saved{color:#4caf50;}
 .port-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
 
 /* ── SPINNER ── */
@@ -544,19 +555,50 @@ function makePortItem(p) {
   item.className = 'port-item';
   item.dataset.id = p.id;
 
+  const imgWrap = document.createElement('div');
+  imgWrap.className = 'port-item-img';
+
   const img = document.createElement('img');
   img.src = p.img_url; img.alt = '';
-  item.appendChild(img);
+  imgWrap.appendChild(img);
 
   const del = document.createElement('button');
   del.className = 'port-del'; del.title = 'Dzēst'; del.textContent = '✕';
   del.addEventListener('click', e => { e.stopPropagation(); deletePortPhoto(p.id, item); });
-  item.appendChild(del);
+  imgWrap.appendChild(del);
 
   const rep = document.createElement('button');
   rep.className = 'port-replace'; rep.textContent = 'Mainīt';
   rep.addEventListener('click', e => { e.stopPropagation(); _replaceId = p.id; document.getElementById('port-replace-file').click(); });
-  item.appendChild(rep);
+  imgWrap.appendChild(rep);
+
+  item.appendChild(imgWrap);
+
+  const authorInput = document.createElement('input');
+  authorInput.className = 'port-author';
+  authorInput.type = 'text';
+  authorInput.placeholder = 'Autors…';
+  authorInput.value = p.author || '';
+  authorInput.maxLength = 50;
+  let _saveTimer;
+  authorInput.addEventListener('mousedown', e => e.stopPropagation());
+  authorInput.addEventListener('dragstart', e => e.stopPropagation());
+  authorInput.addEventListener('input', () => {
+    clearTimeout(_saveTimer);
+    authorInput.classList.remove('saved');
+    authorInput.classList.add('saving');
+    _saveTimer = setTimeout(async () => {
+      try {
+        await api('PATCH', `/api/portfolio/${p.id}`, { author: authorInput.value.trim() });
+        const idx = _portPhotos.findIndex(ph => ph.id === p.id);
+        if (idx >= 0) _portPhotos[idx].author = authorInput.value.trim();
+        authorInput.classList.remove('saving');
+        authorInput.classList.add('saved');
+        setTimeout(() => authorInput.classList.remove('saved'), 1500);
+      } catch(e) { authorInput.classList.remove('saving'); }
+    }, 700);
+  });
+  item.appendChild(authorInput);
 
   item.setAttribute('draggable', 'true');
   item.addEventListener('dragstart', e => { _dragSrc = item; e.dataTransfer.effectAllowed = 'move'; setTimeout(() => item.classList.add('dragging'), 0); });

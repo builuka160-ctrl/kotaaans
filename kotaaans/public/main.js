@@ -30,8 +30,8 @@ const _t = {
     'hero.stat3':    'Pieraksts',
     'services.label':'Preces',
     'services.title':'Mūsu<br>pakalpojumi.',
-    'works.label':   'Mūsu darbi',
-    'works.title':   'Īsti darbi.<br>Nav stock bildes.',
+    'works.label':   'Darbi',
+    'works.title':   'Mūsu darbi.',
     'works.more':    'Rādīt vairāk ↓',
     'works.less':    'Rādīt mazāk ↑',
     'works.instagram':'Visi darbi Instagram ↗',
@@ -67,8 +67,8 @@ const _t = {
     'hero.stat3':    'Booking',
     'services.label':'Services',
     'services.title':'Our<br>services.',
-    'works.label':   'Our Work',
-    'works.title':   'Real work.<br>No stock photos.',
+    'works.label':   'Work',
+    'works.title':   'Our work.',
     'works.more':    'Show more ↓',
     'works.less':    'Show less ↑',
     'works.instagram':'All work on Instagram ↗',
@@ -184,6 +184,37 @@ window.observeReveal = function(el) {
   el.classList.add('reveal-item');
   observer.observe(el);
 };
+
+// ── Portfolio loader (replaces static HTML photos with DB photos) ──
+(async function loadPortfolio() {
+  const masonry = document.getElementById('masonry');
+  if (!masonry) return;
+  try {
+    const res = await fetch('/api/portfolio');
+    if (!res.ok) return;
+    const photos = await res.json();
+    if (!Array.isArray(photos) || !photos.length) return;
+    masonry.innerHTML = '';
+    photos.forEach((p, i) => {
+      const fig = document.createElement('figure');
+      fig.className = 'm-item' + (i % 3 === 0 ? ' m-tall' : '') + (i >= 4 ? ' m-hidden' : '');
+      const img = document.createElement('img');
+      img.src = p.img_url;
+      img.alt = p.author || '';
+      img.loading = i < 4 ? 'eager' : 'lazy';
+      fig.appendChild(img);
+      if (p.author) {
+        const cap = document.createElement('figcaption');
+        cap.textContent = p.author;
+        fig.appendChild(cap);
+      }
+      masonry.appendChild(fig);
+      if (window.observeReveal) window.observeReveal(fig);
+    });
+    const toggleBtn = document.getElementById('galleryToggle');
+    if (toggleBtn) toggleBtn.style.display = photos.length > 4 ? '' : 'none';
+  } catch {}
+})();
 
 // ── Gallery expand / collapse ──────────────────────────────────────
 (function () {
