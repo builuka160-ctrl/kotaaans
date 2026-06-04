@@ -13,6 +13,115 @@
   Promise.all([minWait, pageLoad]).then(hide);
 })();
 
+// ── i18n ───────────────────────────────────────────────────────────
+const _t = {
+  lv: {
+    skip:            'Pāriet uz saturu',
+    'nav.services':  'Preces',
+    'nav.works':     'Darbi',
+    'nav.about':     'Par mums',
+    'nav.contact':   'Pieraksts',
+    'nav.cta':       'Pierakstīties',
+    'hero.desc':     'Precīzi griezumi. Tīras līnijas.<br>Rēzeknē kopš pirmās dienas.',
+    'hero.cta':      'Pierakstīties WhatsApp',
+    'hero.ghost':    'Skatīt darbus',
+    'hero.stat1':    'Google ★',
+    'hero.stat2':    'Atsauksmes',
+    'hero.stat3':    'Pieraksts',
+    'services.label':'Preces',
+    'services.title':'Mūsu<br>pakalpojumi.',
+    'works.label':   'Mūsu darbi',
+    'works.title':   'Īsti darbi.<br>Nav stock bildes.',
+    'works.more':    'Rādīt vairāk ↓',
+    'works.less':    'Rādīt mazāk ↑',
+    'works.instagram':'Visi darbi Instagram ↗',
+    'about.label':   'Par mums',
+    'about.title':   'Valters<br>un Jānis.',
+    'about.body1':   'Divi brāļi ar vienu kopīgu vīziju — mēs izveidojām modernu barbershop ar atmosfēru, kas jūtas svaiga, laipna un patiesi patīkama. Kopš atvēršanas 2025. gada decembrī mēs esam koncentrējušies uz mums vissvarīgākajām vērtībām: kvalitāti, konsekvenci, uzmanību detaļām un patiesu cieņu pret katru klientu, kurš ienāk pie mums.',
+    'about.body2':   'Kā jaunas paaudzes frizieri mēs vēlamies radīt Rēzeknē citādu atmosfēru — personiskāku, relaksētāku, veidotu ap cilvēkiem, kuri patiesi bauda laiku krēslā.',
+    'about.stat1':   'Google vērtējums',
+    'about.stat2':   'Atsauksmes',
+    'about.stat3':   'Pieraksts',
+    'reviews.label': 'Atsauksmes',
+    'reviews.title': 'Par mums saka',
+    'booking.label': 'Pieraksts',
+    'booking.title': 'Piesaki savu<br>griezumu tūlīt!',
+    'booking.sub':   'Pierakstīties var WhatsApp vai izsaucot. Strādājam 24/7 pēc pieraksta.',
+    'booking.addr':  '📍 Dārzu iela 22, Rēzekne',
+    'booking.hours': '🕐 24/7 pēc pieraksta',
+    'footer.nav':    'Navigācija',
+    'footer.contacts':'Kontakti',
+  },
+  en: {
+    skip:            'Skip to content',
+    'nav.services':  'Services',
+    'nav.works':     'Work',
+    'nav.about':     'About',
+    'nav.contact':   'Book',
+    'nav.cta':       'Book Now',
+    'hero.desc':     'Precise cuts. Clean lines.<br>In Rēzekne from day one.',
+    'hero.cta':      'Book via WhatsApp',
+    'hero.ghost':    'View Our Work',
+    'hero.stat1':    'Google ★',
+    'hero.stat2':    'Reviews',
+    'hero.stat3':    'Booking',
+    'services.label':'Services',
+    'services.title':'Our<br>services.',
+    'works.label':   'Our Work',
+    'works.title':   'Real work.<br>No stock photos.',
+    'works.more':    'Show more ↓',
+    'works.less':    'Show less ↑',
+    'works.instagram':'All work on Instagram ↗',
+    'about.label':   'About Us',
+    'about.title':   'Valters<br>&amp; Jānis.',
+    'about.body1':   'Started by two brothers with one shared vision, we created a modern barbershop with an atmosphere that feels fresh, welcoming, and genuinely enjoyable to be part of. Since opening in December 2025, we\'ve stayed focused on the values that matter most to us: quality, consistency, attention to detail, and real respect for every client who walks through our doors.',
+    'about.body2':   'As a new generation of barbers, we want to bring a different kind of atmosphere to Rēzekne that feels more personal, more relaxed, and built around people actually enjoying their time in the chair.',
+    'about.stat1':   'Google rating',
+    'about.stat2':   'Reviews',
+    'about.stat3':   'Booking',
+    'reviews.label': 'Reviews',
+    'reviews.title': 'What they say',
+    'booking.label': 'Book Now',
+    'booking.title': 'Book your<br>haircut now!',
+    'booking.sub':   'Book via WhatsApp or by calling. We work 24/7 by appointment.',
+    'booking.addr':  '📍 Dārzu iela 22, Rēzekne',
+    'booking.hours': '🕐 24/7 by appointment',
+    'footer.nav':    'Navigation',
+    'footer.contacts':'Contacts',
+  },
+};
+
+let _lang = localStorage.getItem('lang') || 'lv';
+
+function applyLang(lang) {
+  _lang = lang;
+  localStorage.setItem('lang', lang);
+  document.documentElement.lang = lang;
+
+  const t = _t[lang] || _t.lv;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.dataset.i18n;
+    if (key in t) el.innerHTML = t[key];
+  });
+
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+
+  const toggle = document.getElementById('galleryToggle');
+  if (toggle) {
+    const expanded = toggle.getAttribute('aria-expanded') === 'true';
+    toggle.innerHTML = expanded ? t['works.less'] : t['works.more'];
+  }
+}
+
+document.querySelectorAll('.lang-btn').forEach(btn => {
+  btn.addEventListener('click', () => applyLang(btn.dataset.lang));
+});
+
+applyLang(_lang);
+
+// ── Nav ────────────────────────────────────────────────────────────
 const nav = document.getElementById('nav');
 const burger = document.getElementById('burger');
 const navLinks = document.getElementById('nav-links');
@@ -76,7 +185,7 @@ window.observeReveal = function(el) {
   observer.observe(el);
 };
 
-// Gallery expand / collapse (mobile only)
+// ── Gallery expand / collapse ──────────────────────────────────────
 (function () {
   const toggle = document.getElementById('galleryToggle');
   const masonry = document.getElementById('masonry');
@@ -85,9 +194,9 @@ window.observeReveal = function(el) {
   toggle.addEventListener('click', () => {
     const expanded = masonry.classList.toggle('expanded');
     toggle.setAttribute('aria-expanded', expanded);
-    toggle.textContent = expanded ? 'Paslēpt ↑' : 'Rādīt vairāk ↓';
+    const t = _t[_lang] || _t.lv;
+    toggle.innerHTML = expanded ? t['works.less'] : t['works.more'];
     if (!expanded) {
-      // Scroll back to top of section when collapsing
       masonry.closest('section').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   });
@@ -134,7 +243,6 @@ window.observeReveal = function(el) {
         </article>`;
     }).join('');
 
-    // trigger reveal animations for newly added cards
     grid.querySelectorAll('.svc-card').forEach(el => {
       if (window.observeReveal) window.observeReveal(el);
     });
