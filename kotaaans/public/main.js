@@ -30,7 +30,7 @@ const _t = {
     'hero.stat3':    'Pieraksts',
     'services.label':'Preces',
     'services.title':'Mūsu<br>pakalpojumi.',
-    'works.label':   'Mūsu darbi',
+    'works.label':   'Portfolio',
     'works.title':   'Īsti darbi.<br>Nav stock bildes.',
     'works.more':    'Rādīt vairāk ↓',
     'works.less':    'Rādīt mazāk ↑',
