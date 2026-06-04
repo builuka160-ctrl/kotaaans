@@ -185,6 +185,37 @@ window.observeReveal = function(el) {
   observer.observe(el);
 };
 
+// ── Portfolio loader (replaces static HTML photos with DB photos) ──
+(async function loadPortfolio() {
+  const masonry = document.getElementById('masonry');
+  if (!masonry) return;
+  try {
+    const res = await fetch('/api/portfolio');
+    if (!res.ok) return;
+    const photos = await res.json();
+    if (!Array.isArray(photos) || !photos.length) return;
+    masonry.innerHTML = '';
+    photos.forEach((p, i) => {
+      const fig = document.createElement('figure');
+      fig.className = 'm-item' + (i % 3 === 0 ? ' m-tall' : '') + (i >= 4 ? ' m-hidden' : '');
+      const img = document.createElement('img');
+      img.src = p.img_url;
+      img.alt = p.author || '';
+      img.loading = i < 4 ? 'eager' : 'lazy';
+      fig.appendChild(img);
+      if (p.author) {
+        const cap = document.createElement('figcaption');
+        cap.textContent = p.author;
+        fig.appendChild(cap);
+      }
+      masonry.appendChild(fig);
+      if (window.observeReveal) window.observeReveal(fig);
+    });
+    const toggleBtn = document.getElementById('galleryToggle');
+    if (toggleBtn) toggleBtn.style.display = photos.length > 4 ? '' : 'none';
+  } catch {}
+})();
+
 // ── Gallery expand / collapse ──────────────────────────────────────
 (function () {
   const toggle = document.getElementById('galleryToggle');
