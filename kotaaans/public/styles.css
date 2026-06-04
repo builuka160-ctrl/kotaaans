@@ -316,7 +316,6 @@ figure { margin: 0; }
 
 .works-more { text-align: center; margin-top: 44px; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: center; }
 
-/* Mobile gallery toggle — hidden on desktop */
 .gallery-toggle { display: none; }
 
 @media (max-width: 600px) {
