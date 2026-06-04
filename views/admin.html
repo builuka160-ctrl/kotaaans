@@ -21,7 +21,6 @@
 html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',system-ui,sans-serif;line-height:1.6;}
 ::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--accent2);border-radius:3px;}
 
-/* ── AUTH ── */
 #auth-page{
   display:flex;align-items:center;justify-content:center;
   min-height:100vh;padding:24px;
@@ -57,7 +56,6 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM
 .msg-err{background:var(--err-bg);color:var(--err);border-radius:10px;padding:12px 15px;font-size:13px;margin-top:8px;}
 .msg-ok{background:var(--ok-bg);color:var(--ok);border-radius:10px;padding:12px 15px;font-size:13px;margin-top:8px;display:flex;align-items:center;gap:8px;}
 
-/* ── PANEL ── */
 #panel-page{display:none;min-height:100vh;flex-direction:column;}
 .panel-header{
   background:var(--bg2);border-bottom:1px solid var(--line);
@@ -73,7 +71,6 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM
 }
 .logout-btn:hover{border-color:var(--accent);color:var(--accent);}
 
-/* ── TABS ── */
 .panel-tabs{
   display:flex;border-bottom:1px solid var(--line);
   background:var(--bg2);padding:0 40px;position:sticky;top:58px;z-index:99;
@@ -87,10 +84,8 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM
 .ptab:hover{color:var(--text);}
 .ptab.active{color:var(--accent);border-bottom-color:var(--accent);}
 
-/* ── LAYOUT ── */
 .tab-body{padding:36px 40px;max-width:1160px;margin:0 auto;width:100%;}
 
-/* ── CARDS ── */
 .card{background:var(--bg2);border:1px solid var(--line);border-radius:16px;padding:28px;}
 .card-title{
   font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:0.04em;
@@ -99,11 +94,9 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM
 }
 .pill{background:var(--accent2);color:#fff;border-radius:999px;font-size:10px;padding:2px 10px;font-weight:700;font-family:'DM Sans',sans-serif;}
 
-/* ── TWO COL ── */
 .two-col{display:grid;grid-template-columns:380px 1fr;gap:28px;align-items:start;}
 @media(max-width:860px){.two-col{grid-template-columns:1fr;}.tab-body{padding:20px;}.panel-header,.panel-tabs{padding:0 20px;}}
 
-/* ── UPLOAD ── */
 .upload-box{
   border:1.5px dashed rgba(201,167,255,.3);border-radius:12px;
   padding:22px;text-align:center;cursor:pointer;transition:all .2s;
@@ -114,7 +107,6 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM
 .upload-icon{font-size:30px;margin-bottom:6px;}
 .upload-hint{font-size:12px;color:var(--muted);}
 
-/* ── PRODUCT LIST ── */
 .prod-list{display:flex;flex-direction:column;gap:8px;max-height:580px;overflow-y:auto;}
 .prow{
   display:flex;align-items:center;gap:12px;
@@ -134,7 +126,6 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM
 .dbtn{background:none;border:none;font-size:16px;cursor:pointer;padding:6px;border-radius:8px;transition:background .15s;line-height:1;flex-shrink:0;}
 .dbtn:hover{background:var(--err-bg);}
 
-/* ── PORTFOLIO GRID ── */
 .port-grid{
   display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:20px;
 }
@@ -173,11 +164,9 @@ html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'DM
 .port-author.saved{color:#4caf50;}
 .port-actions{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
 
-/* ── SPINNER ── */
 .spinner{width:20px;height:20px;border:2px solid var(--line2);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;display:inline-block;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-/* ── TOAST ── */
 #toast{
   position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(70px);
   background:var(--bg2);color:var(--text);border:1px solid var(--line2);

@@ -13,7 +13,6 @@
   Promise.all([minWait, pageLoad]).then(hide);
 })();
 
-// ── i18n ───────────────────────────────────────────────────────────
 const _t = {
   lv: {
     skip:            'Pāriet uz saturu',
@@ -127,7 +126,6 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
 
 applyLang(_lang);
 
-// ── Nav ────────────────────────────────────────────────────────────
 const nav = document.getElementById('nav');
 const burger = document.getElementById('burger');
 const navLinks = document.getElementById('nav-links');
@@ -191,7 +189,6 @@ window.observeReveal = function(el) {
   observer.observe(el);
 };
 
-// ── Portfolio loader (replaces static HTML photos with DB photos) ──
 (async function loadPortfolio() {
   const masonry = document.getElementById('masonry');
   if (!masonry) return;
@@ -224,7 +221,6 @@ window.observeReveal = function(el) {
   } catch {}
 })();
 
-// ── Gallery expand / collapse ──────────────────────────────────────
 (function () {
   const toggle = document.getElementById('galleryToggle');
   const masonry = document.getElementById('masonry');
@@ -241,7 +237,6 @@ window.observeReveal = function(el) {
   });
 })();
 
-// ── Services loader ────────────────────────────────────────────────
 (async function loadServices() {
   const grid = document.getElementById('services-grid');
   if (!grid) return;
