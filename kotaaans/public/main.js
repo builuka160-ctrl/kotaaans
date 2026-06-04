@@ -32,6 +32,7 @@ const _t = {
     'services.title':'Mūsu<br>pakalpojumi.',
     'works.label':   'Darbi',
     'works.title':   'Mūsu darbi.',
+    'works.author':  'Autors',
     'works.more':    'Rādīt vairāk ↓',
     'works.less':    'Rādīt mazāk ↑',
     'works.instagram':'Visi darbi Instagram ↗',
@@ -69,6 +70,7 @@ const _t = {
     'services.title':'Our<br>services.',
     'works.label':   'Work',
     'works.title':   'Our work.',
+    'works.author':  'Author',
     'works.more':    'Show more ↓',
     'works.less':    'Show less ↑',
     'works.instagram':'All work on Instagram ↗',
@@ -113,6 +115,10 @@ function applyLang(lang) {
     const expanded = toggle.getAttribute('aria-expanded') === 'true';
     toggle.innerHTML = expanded ? t['works.less'] : t['works.more'];
   }
+
+  document.querySelectorAll('figcaption[data-author]').forEach(cap => {
+    cap.textContent = t['works.author'] + ': ' + cap.dataset.author;
+  });
 }
 
 document.querySelectorAll('.lang-btn').forEach(btn => {
@@ -205,7 +211,9 @@ window.observeReveal = function(el) {
       fig.appendChild(img);
       if (p.author) {
         const cap = document.createElement('figcaption');
-        cap.textContent = p.author;
+        cap.dataset.author = p.author;
+        const t = _t[_lang] || _t.lv;
+        cap.textContent = t['works.author'] + ': ' + p.author;
         fig.appendChild(cap);
       }
       masonry.appendChild(fig);
