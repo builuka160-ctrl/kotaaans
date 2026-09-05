@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f2f1ed">
+    <meta name="description" content="Kotans Barber — барбершоп в Резекне. Стрижки, оформление бороды и онлайн-запись.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700&family=Playfair+Display:ital,wght@1,500&display=swap" rel="stylesheet">
+    <script>try{document.documentElement.dataset.theme=localStorage.getItem('kotans-theme')||'light'}catch(_){document.documentElement.dataset.theme='light'}</script>
+    <link rel="stylesheet" href="css/styles.css">
+    <title>Kotans Barber · Rēzekne</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#booking" data-i18n="nav.book">Book a visit</a>
+    <header class="site-header">
+      <a href="#top" class="brand" aria-label="Kotans Barber"><img src="images/logo.png" alt="Kotans Barber"></a>
+      <nav class="desktop-nav" aria-label="Main navigation">
+        <a href="#services" data-i18n="nav.services">Services</a>
+        <a href="#work" data-i18n="nav.work">Work</a>
+        <a href="#visit" data-i18n="nav.visit">Visit</a>
+      </nav>
+      <div class="header-actions">
+        <button id="themeToggle" class="theme-toggle" type="button" aria-label="Dark theme"><span class="theme-icon" aria-hidden="true"></span><span class="theme-label">Dark</span></button>
+        <div class="language-switcher" aria-label="Language">
+          <button class="lang active" type="button" data-lang="ru">RU</button>
+          <button class="lang" type="button" data-lang="lv">LV</button>
+          <button class="lang" type="button" data-lang="en">EN</button>
+        </div>
+        <a href="#booking" class="button button-accent book-link" data-i18n="nav.book">Book a visit</a>
+      </div>
+    </header>
+    <main id="top">
+      <section class="hero">
+        <div class="hero-word" aria-hidden="true">KOTANS</div>
+        <div class="hero-copy section-shell">
+          <div class="hero-intro"><p class="eyebrow" data-i18n="hero.kicker">BARBER SHOP · RĒZEKNE</p><p class="hero-lead" data-i18n="hero.lead">A considered cut, an attentive barber and a space where you can take your time. Visits are by appointment.</p></div>
+          <h1 data-i18n-html="hero.title">A sharp cut.<br><em>Time set aside</em> for you.</h1>
+          <figure class="hero-visual"><img src="images/mesto.png" alt="Kotans Barber interior"><figcaption><span data-i18n="hero.caption1">Dārzu iela 22</span><span data-i18n="hero.caption2">By appointment</span></figcaption></figure>
+          <div class="hero-bottom"><div class="hero-actions"><a href="#booking" class="button button-dark" data-i18n-html="hero.cta">Make an appointment <span>↘</span></a><a href="#about" class="text-link" data-i18n-html="hero.about">About the shop <span>↓</span></a></div><div class="hero-details"><span data-i18n="hero.caption1">Dārzu iela 22</span><span>Rēzekne · LV-4601</span><span data-i18n="hero.caption2">By appointment</span></div></div>
+        </div>
+      </section>
+      <section id="about" class="statement section-shell reveal">
+        <div class="section-marker"><span>02</span><span data-i18n="about.kicker">THE KOTANS APPROACH</span></div>
+        <div class="statement-main"><h2 data-i18n-html="about.title">Good grooming is a <em>quiet confidence.</em></h2><div class="statement-copy"><p data-i18n="about.copy">Kotans is made for people who value a precise result and a relaxed atmosphere. We take time to understand your hair, beard and routine before the work begins.</p><p data-i18n="about.copy2">Every barber on our team is professionally qualified. Technique, hygiene and a genuine, individual approach are non-negotiable in every chair.</p></div></div>
+        <div class="facts" aria-label="Key facts"><div><strong>01</strong><span data-i18n-html="facts.one">Personal<br>consultation</span></div><div><strong>30</strong><span data-i18n-html="facts.two">Minute<br>booking rhythm</span></div><div><strong>LV</strong><span data-i18n-html="facts.three">Rēzekne,<br>Latvia</span></div></div>
+      </section>
+      <section id="services" class="services reveal">
+        <div class="section-shell">
+          <div class="section-heading"><div class="section-marker"><span>03</span><span data-i18n="services.kicker">SERVICES</span></div><h2 data-i18n-html="services.title">Designed around <em>your look.</em></h2><p data-i18n="services.note">Choose a service and a preferred date. We will assign the earliest available time automatically.</p></div>
+          <div class="service-list">
+            <article class="service-card" data-service-card="haircut"><span class="service-number">01</span><div class="service-main"><h3 data-i18n="service.haircut.name">Haircut</h3><p data-i18n="service.haircut.text">A precise, tailored cut with a brief consultation before we begin.</p></div><div class="service-meta"><span>60 min</span><strong>20 €</strong></div><button class="card-book" type="button" data-service="haircut" aria-label="Book haircut"><span>↘</span></button></article>
+            <article class="service-card" data-service-card="beard"><span class="service-number">02</span><div class="service-main"><h3 data-i18n="service.beard.name">Beard trim</h3><p data-i18n="service.beard.text">Shape, clean lines and care that works with your natural growth.</p></div><div class="service-meta"><span>90 min</span><strong>20 €</strong></div><button class="card-book" type="button" data-service="beard" aria-label="Book beard trim"><span>↘</span></button></article>
+            <article class="service-card" data-service-card="combo"><span class="service-number">03</span><div class="service-main"><h3 data-i18n="service.combo.name">Haircut + beard</h3><p data-i18n="service.combo.text">A complete appointment for a coherent, well-finished look.</p></div><div class="service-meta"><span>90 min</span><strong>35–40 €</strong></div><button class="card-book" type="button" data-service="combo" aria-label="Book haircut and beard"><span>↘</span></button></article>
+            <article class="service-card" data-service-card="hairTone"><span class="service-number">04</span><div class="service-main"><h3 data-i18n="service.hairTone.name">Hair toning</h3><p data-i18n="service.hairTone.text">Toning is planned individually — speak with your barber about the result and price.</p></div><div class="service-meta"><span data-i18n="services.consult">consultation</span><strong data-i18n="services.ask">ask your barber</strong></div><button class="card-book" type="button" data-service="hairTone" aria-label="Book hair toning"><span>↘</span></button></article>
+            <article class="service-card" data-service-card="beardTone"><span class="service-number">05</span><div class="service-main"><h3 data-i18n="service.beardTone.name">Beard toning</h3><p data-i18n="service.beardTone.text">A natural-looking refresh, agreed with your barber before the visit.</p></div><div class="service-meta"><span data-i18n="services.consult">consultation</span><strong data-i18n="services.ask">ask your barber</strong></div><button class="card-book" type="button" data-service="beardTone" aria-label="Book beard toning"><span>↘</span></button></article>
+          </div>
+        </div>
+      </section>
+      <section id="work" class="work section-shell reveal">
+        <div class="section-heading work-heading"><div class="section-marker"><span>04</span><span data-i18n="work.kicker">IN THE CHAIR</span></div><h2 data-i18n-html="work.title">The work speaks <em>for itself.</em></h2></div>
+        <div class="work-grid">
+          <figure class="work-video"><video controls playsinline preload="metadata" poster="images/mesto.png"><source src="media/one.mp4" type="video/mp4"></video><figcaption><span>01 / 02</span><span data-i18n="work.one">Detail in every movement.</span></figcaption></figure>
+          <figure class="work-video work-video-offset"><video controls playsinline preload="metadata" poster="images/mesto.png"><source src="media/two.mp4" type="video/mp4"></video><figcaption><span>02 / 02</span><span data-i18n="work.two">A finish made for you.</span></figcaption></figure>
+        </div>
+      </section>
+      <section id="booking" class="booking reveal">
+        <div class="booking-layout section-shell">
+          <div class="booking-intro"><div class="section-marker"><span>05</span><span data-i18n="booking.kicker">ONLINE BOOKING</span></div><h2 data-i18n-html="booking.title">Your chair is <em>waiting.</em></h2><p data-i18n="booking.copy">Tell us who you are, choose your service and date. The system reserves the first suitable appointment in that day’s schedule.</p><button id="notificationsButton" type="button" class="notification-link"><span class="bell" aria-hidden="true">○</span><span data-i18n="booking.notify">Turn on appointment notifications</span></button></div>
+          <form id="bookingForm" class="booking-form" novalidate>
+            <div class="form-row"><label><span data-i18n="form.name">Name and surname</span><input name="name" autocomplete="name" required maxlength="100"></label><label><span data-i18n="form.age">Age</span><input name="age" type="number" min="12" max="120" inputmode="numeric" required></label></div>
+            <label><span data-i18n="form.service">Service</span><select name="service" required><option value="haircut" data-i18n="service.haircut.name">Haircut</option><option value="beard" data-i18n="service.beard.name">Beard trim</option><option value="combo" data-i18n="service.combo.name">Haircut + beard</option><option value="hairTone" data-i18n="service.hairTone.name">Hair toning</option><option value="beardTone" data-i18n="service.beardTone.name">Beard toning</option></select></label>
+            <fieldset class="week-fieldset">
+              <legend data-i18n="form.date">Preferred date</legend>
+              <div id="weekPicker" class="week-picker" aria-label="Seven days ahead"></div>
+              <input id="bookingDate" name="date" type="hidden" required>
+            </fieldset>
+            <div id="availabilityHint" class="availability-hint" aria-live="polite"></div>
+            <button class="button button-dark submit-booking" type="submit"><span data-i18n="form.submit">Request an appointment</span><span>↘</span></button>
+            <p class="form-footnote" data-i18n="form.note">You do not select a time: the first available time will be assigned to your request. The administrator will then confirm it.</p><p id="bookingMessage" class="form-message" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </section>
+      <section id="visit" class="visit section-shell reveal">
+        <div class="section-marker"><span>06</span><span data-i18n="visit.kicker">VISIT KOTANS</span></div>
+        <div class="visit-title"><h2 data-i18n-html="visit.title">Come take a<br><em>seat.</em></h2></div>
+        <div class="visit-info"><div><span data-i18n="visit.addressLabel">Address</span><a target="_blank" rel="noreferrer" href="https://www.google.com/maps/search/?api=1&query=D%C4%81rzu%20iela%2022%2C%20R%C4%93zekne%2C%20Latvia">Dārzu iela 22<br>Rēzekne LV-4601, Latvia ↗</a></div><div><span data-i18n="visit.phoneLabel">Phone</span><a href="tel:+37124118068">+371 24 118 068</a></div><div><span data-i18n="visit.hoursLabel">Hours</span><p data-i18n-html="visit.hours">Set by appointment<br>in the online schedule</p></div></div>
+      </section>
+    </main>
+    <footer class="footer"><a href="#top" class="footer-brand" aria-label="Kotans Barber"><img src="images/logo.png" alt=""></a><p data-i18n="footer.copy">Qualified barbers. Considered grooming. Rēzekne.</p><button class="admin-link" type="button" id="openAdmin" data-i18n="footer.admin">Administrator</button><span>© <span id="year"></span> KOTANS</span></footer>
+    <dialog id="adminDialog" class="admin-dialog" aria-labelledby="adminDialogTitle">
+      <button class="dialog-close" type="button" id="closeAdmin" aria-label="Close">×</button>
+      <section id="adminLogin" class="admin-login"><p class="eyebrow" data-i18n="admin.kicker">PRIVATE AREA</p><h2 id="adminDialogTitle" data-i18n="admin.loginTitle">Administrator sign in</h2><form id="loginForm"><label><span data-i18n="admin.password">Password</span><input type="password" name="password" autocomplete="current-password" required></label><button class="button button-dark" type="submit" data-i18n="admin.enter">Enter</button><p id="loginMessage" class="form-message" role="status"></p></form></section>
+      <section id="adminPanel" class="admin-panel" hidden><div class="admin-panel-head"><div><p class="eyebrow" data-i18n="admin.kicker">PRIVATE AREA</p><h2 data-i18n="admin.title">Appointments</h2></div><div><button id="adminNotifications" class="admin-mini-button" type="button" data-i18n="admin.notifications">Enable notifications</button><button id="logout" class="admin-mini-button" type="button" data-i18n="admin.logout">Sign out</button></div></div><div id="adminSummary" class="admin-summary"></div><div id="adminBookings" class="admin-bookings"></div><section class="admin-section"><div><p class="eyebrow" data-i18n="admin.scheduleKicker">WORKING HOURS</p><h3 data-i18n="admin.scheduleTitle">Weekly schedule</h3><p data-i18n="admin.scheduleCopy">Visitors receive the first suitable slot within these hours. Set a day to closed if you are not working.</p></div><form id="hoursForm" class="hours-form"></form><button form="hoursForm" type="submit" class="button button-accent" data-i18n="admin.saveHours">Save schedule</button></section><section class="admin-section blocked-section"><div><p class="eyebrow" data-i18n="admin.blockedKicker">ACCESS CONTROL</p><h3 data-i18n="admin.blockedTitle">Blocked IP addresses</h3></div><div id="blockedIps" class="blocked-ips"></div></section></section>
+    </dialog>
+    <script src="js/app.js" defer></script>
+  </body>
+</html>
