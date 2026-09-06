@@ -12,13 +12,17 @@ const DEFAULT_HOURS = {
 
 // Duration (minutes) and displayed price per service, per locale — matches the
 // price list from the brief and the exact "ask your barber" wording already
-// used in the frontend's own translation dictionary (services.ask).
+// used in the frontend's own translation dictionary (services.ask). Toning
+// slots are 60 minutes, the length used by the client's own booking build.
 const SERVICES = {
   haircut: { duration: 60, price: { ru: "20 €", lv: "20 €", en: "20 €" } },
   beard: { duration: 90, price: { ru: "20 €", lv: "20 €", en: "20 €" } },
   combo: { duration: 90, price: { ru: "35–40 €", lv: "35–40 €", en: "35–40 €" } },
-  hairTone: { duration: 30, price: { ru: "писать барберу", lv: "rakstiet bārddzinim", en: "message the barber" } },
-  beardTone: { duration: 30, price: { ru: "писать барберу", lv: "rakstiet bārddzinim", en: "message the barber" } }
+  // "toning" is the generic toning request kept for compatibility with the
+  // Apps Script price list; the frontend offers the two specific variants.
+  toning: { duration: 60, price: { ru: "писать барберу", lv: "rakstiet bārddzinim", en: "message the barber" } },
+  hairTone: { duration: 60, price: { ru: "писать барберу", lv: "rakstiet bārddzinim", en: "message the barber" } },
+  beardTone: { duration: 60, price: { ru: "писать барберу", lv: "rakstiet bārddzinim", en: "message the barber" } }
 };
 
 const SERVICE_KEYS = Object.keys(SERVICES);
@@ -41,6 +45,12 @@ function minutesToTime(mins) {
 
 function addMinutes(hhmm, minutes) {
   return minutesToTime(timeToMinutes(hhmm) + minutes);
+}
+
+// The shop's calendar day, not the server's: a host in another timezone must
+// not let a client book a date that is already in the past in Rēzekne.
+function todayInRiga() {
+  return new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Riga" }).format(new Date());
 }
 
 function dayOfWeek(dateStr) {
@@ -76,5 +86,6 @@ module.exports = {
   minutesToTime,
   addMinutes,
   dayOfWeek,
+  todayInRiga,
   findNextSlot
 };

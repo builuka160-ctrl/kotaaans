@@ -16,7 +16,8 @@ function createSheetsStore(config) {
     const res = await fetch(url.toString(), {
       method,
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: body ? JSON.stringify({ token: sheetsToken, ...body }) : undefined
+      body: body ? JSON.stringify({ token: sheetsToken, ...body }) : undefined,
+      redirect: "follow"
     });
 
     const text = await res.text();
@@ -60,6 +61,27 @@ function createSheetsStore(config) {
         statusUpdatedAt: new Date().toISOString(),
         ...data
       });
+    },
+
+    /**
+     * Slot search and the append happen inside the Apps Script under a script
+     * lock (see the `reserve` action in Code.gs), so two clients submitting at
+     * the same second cannot both be given the same time.
+     */
+    async reserveBooking({ booking, open, close, durationMinutes }) {
+      const json = await call("POST", {}, {
+        action: "reserve",
+        sheet: "Bookings",
+        data: {
+          status: "pending",
+          reason: "",
+          createdAt: new Date().toISOString(),
+          statusUpdatedAt: new Date().toISOString(),
+          ...booking
+        },
+        reserve: { open, close, durationMinutes }
+      });
+      return json.row || null;
     },
 
     async updateBooking(id, patch) {
@@ -111,6 +133,24 @@ function createSheetsStore(config) {
         else await appendRow("Schedule", { id: day, ...data });
       }
       return hours;
+    },
+
+    async listAdminSubscribers() {
+      return listRows("AdminSubscribers");
+    },
+
+    async addAdminSubscriber(subscription) {
+      const rows = await listRows("AdminSubscribers");
+      const existing = rows.find((row) => row.endpoint === subscription.endpoint);
+      const data = { ...subscription, createdAt: new Date().toISOString() };
+      if (existing) return updateRow("AdminSubscribers", existing.id, data);
+      return appendRow("AdminSubscribers", data);
+    },
+
+    async removeAdminSubscriber(endpoint) {
+      const rows = await listRows("AdminSubscribers");
+      const existing = rows.find((row) => row.endpoint === endpoint);
+      if (existing) await deleteRow("AdminSubscribers", existing.id);
     }
   };
 }

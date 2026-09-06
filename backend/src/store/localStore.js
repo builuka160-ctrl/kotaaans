@@ -1,15 +1,24 @@
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
-const { DEFAULT_HOURS } = require("../scheduleUtils");
+const { DEFAULT_HOURS, findNextSlot, addMinutes } = require("../scheduleUtils");
 
-const DB_PATH = path.join(__dirname, "..", "..", "data", "db.json");
+// LOCAL_DB_PATH exists so tests (and a host with a writable volume elsewhere)
+// can point the file somewhere other than backend/data/db.json.
+const DB_PATH = process.env.LOCAL_DB_PATH
+  ? path.resolve(process.env.LOCAL_DB_PATH)
+  : path.join(__dirname, "..", "..", "data", "db.json");
 
 function readDb() {
   try {
-    return JSON.parse(fs.readFileSync(DB_PATH, "utf8"));
+    const db = JSON.parse(fs.readFileSync(DB_PATH, "utf8"));
+    db.bookings = db.bookings || [];
+    db.blockedIps = db.blockedIps || [];
+    db.adminSubscribers = db.adminSubscribers || [];
+    db.hours = db.hours || { ...DEFAULT_HOURS };
+    return db;
   } catch (_) {
-    return { bookings: [], blockedIps: [], hours: { ...DEFAULT_HOURS } };
+    return { bookings: [], blockedIps: [], hours: { ...DEFAULT_HOURS }, adminSubscribers: [] };
   }
 }
 
@@ -18,7 +27,7 @@ function writeDb(db) {
   fs.writeFileSync(DB_PATH, JSON.stringify(db, null, 2));
 }
 
-/** JSON-file store used when GOOGLE_SHEETS_URL is not configured yet. */
+/** JSON-file store used when no Google Sheets connection is configured yet. */
 function createLocalStore() {
   return {
     async listBookings() {
@@ -38,6 +47,31 @@ function createLocalStore() {
       db.bookings.push(booking);
       writeDb(db);
       return booking;
+    },
+
+    /**
+     * Picks the first free slot and writes the booking in one go. Reading,
+     * choosing and writing happen without an await in between, so two requests
+     * arriving together can never be handed the same slot.
+     */
+    async reserveBooking({ booking, open, close, durationMinutes }) {
+      const db = readDb();
+      const busy = db.bookings.filter((b) => b.date === booking.date && b.status !== "rejected" && b.status !== "cancelled");
+      const time = findNextSlot({ open, close, durationMinutes, busy });
+      if (!time) return null;
+      const record = {
+        id: crypto.randomUUID(),
+        createdAt: new Date().toISOString(),
+        statusUpdatedAt: new Date().toISOString(),
+        status: "pending",
+        reason: "",
+        ...booking,
+        time,
+        endTime: addMinutes(time, durationMinutes)
+      };
+      db.bookings.push(record);
+      writeDb(db);
+      return record;
     },
 
     async updateBooking(id, patch) {
@@ -87,6 +121,23 @@ function createLocalStore() {
       db.hours = hours;
       writeDb(db);
       return hours;
+    },
+
+    async listAdminSubscribers() {
+      return readDb().adminSubscribers;
+    },
+
+    async addAdminSubscriber(subscription) {
+      const db = readDb();
+      db.adminSubscribers = db.adminSubscribers.filter((row) => row.endpoint !== subscription.endpoint);
+      db.adminSubscribers.push({ id: crypto.randomUUID(), createdAt: new Date().toISOString(), ...subscription });
+      writeDb(db);
+    },
+
+    async removeAdminSubscriber(endpoint) {
+      const db = readDb();
+      db.adminSubscribers = db.adminSubscribers.filter((row) => row.endpoint !== endpoint);
+      writeDb(db);
     }
   };
 }
