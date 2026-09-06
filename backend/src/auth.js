@@ -2,24 +2,40 @@ const crypto = require("crypto");
 const config = require("./config");
 
 const COOKIE_NAME = "kotans_admin_sid";
-const SESSION_TTL_MS = 12 * 60 * 60 * 1000; // 12h, matches the previous token lifetime
+const SESSION_TTL_MS = 12 * 60 * 60 * 1000;
 
-// Single-process in-memory session store. Fine for one small shop's server;
-// a multi-instance deployment would need a shared store instead.
-const sessions = new Map();
+// Stateless, HMAC-signed session token. Nothing is kept in process memory, so
+// the same cookie keeps working across a restart, behind several instances and
+// inside a Netlify function — where an in-memory session map would be lost
+// between invocations. Without SESSION_SECRET a random one is generated at
+// boot, which just means sessions end when the process does.
+const secret = config.sessionSecret || crypto.randomBytes(32).toString("hex");
 
-function pruneExpired() {
-  const now = Date.now();
-  for (const [id, expiresAt] of sessions) {
-    if (expiresAt < now) sessions.delete(id);
+function sign(payload) {
+  return crypto.createHmac("sha256", secret).update(payload).digest("base64url");
+}
+
+function createToken() {
+  const payload = Buffer.from(JSON.stringify({ role: "admin", exp: Date.now() + SESSION_TTL_MS })).toString("base64url");
+  return `${payload}.${sign(payload)}`;
+}
+
+function verifyToken(token) {
+  const [payload, signature] = String(token || "").split(".");
+  if (!payload || !signature) return false;
+  const expected = sign(payload);
+  if (signature.length !== expected.length) return false;
+  if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) return false;
+  try {
+    const data = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    return data.role === "admin" && Number(data.exp) > Date.now();
+  } catch (_) {
+    return false;
   }
 }
 
 function createSession(res) {
-  pruneExpired();
-  const id = crypto.randomBytes(32).toString("hex");
-  sessions.set(id, Date.now() + SESSION_TTL_MS);
-  res.cookie(COOKIE_NAME, id, {
+  res.cookie(COOKIE_NAME, createToken(), {
     httpOnly: true,
     sameSite: "lax",
     secure: config.cookieSecure,
@@ -29,20 +45,11 @@ function createSession(res) {
 }
 
 function destroySession(req, res) {
-  const id = req.cookies?.[COOKIE_NAME];
-  if (id) sessions.delete(id);
-  res.clearCookie(COOKIE_NAME, { path: "/" });
+  res.clearCookie(COOKIE_NAME, { path: "/", sameSite: "lax", secure: config.cookieSecure });
 }
 
 function isAuthenticated(req) {
-  const id = req.cookies?.[COOKIE_NAME];
-  if (!id) return false;
-  const expiresAt = sessions.get(id);
-  if (!expiresAt || expiresAt < Date.now()) {
-    sessions.delete(id);
-    return false;
-  }
-  return true;
+  return verifyToken(req.cookies?.[COOKIE_NAME]);
 }
 
 function requireAdmin(req, res, next) {

@@ -1,17 +1,32 @@
-# Only needed if you keep the frontend on Netlify and run backend/ somewhere
-# else (Render, Railway, a VPS...). The site's js/app.js calls relative
-# paths like fetch('/api/bookings') with no configurable base URL, so this
-# proxy rule makes Netlify forward those calls to the real backend while the
-# browser still sees everything as same-origin (so the admin session cookie
-# keeps working). Replace YOUR-BACKEND-URL below with the deployed backend's
-# address before publishing.
+# Netlify deployment: the frontend is served from the CDN and every /api/*
+# request runs the Express app inside one serverless function. See HOSTING.md.
 #
-# If instead you deploy backend/ and the frontend together as one app (see
-# backend/server.js, which already serves this frontend), you don't need
-# this file at all — delete it.
+# Set ADMIN_PASSWORD, SESSION_SECRET and GOOGLE_SHEETS_URL (the Apps Script
+# /exec address) in Netlify's environment variables, never in this file — a
+# serverless function has no writable disk, so the local JSON fallback would
+# lose every booking between invocations.
+
+[build]
+  command = "npm --prefix backend ci --omit=dev && node scripts/build-static.js"
+  publish = "dist"
+  functions = "backend/netlify/functions"
+
+[functions]
+  node_bundler = "esbuild"
 
 [[redirects]]
   from = "/api/*"
-  to = "https://YOUR-BACKEND-URL/api/:splat"
+  to = "/.netlify/functions/api/:splat"
   status = 200
   force = true
+
+# Alternative setup: keep the frontend here and run backend/ on a Node host
+# (Render, Railway, a VPS...). Delete the redirect above, uncomment this one
+# and put the backend's address in it. The browser still sees one origin, so
+# the admin session cookie keeps working.
+#
+# [[redirects]]
+#   from = "/api/*"
+#   to = "https://YOUR-BACKEND-URL/api/:splat"
+#   status = 200
+#   force = true

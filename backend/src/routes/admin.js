@@ -1,7 +1,8 @@
 const express = require("express");
 const crypto = require("crypto");
 const config = require("../config");
-const store = require("../store");
+const { store } = require("../store");
+const push = require("../push");
 const { createSession, destroySession, isAuthenticated, requireAdmin } = require("../auth");
 const rateLimiter = require("../rateLimiter");
 
@@ -58,6 +59,16 @@ router.patch("/bookings/:id", async (req, res, next) => {
     }
     const booking = await store.updateBooking(req.params.id, patch);
     if (!booking) return res.status(404).json({ error: "not_found" });
+
+    // Tell the client's browser, if it left a push subscription with the request.
+    push.notifyBooking(booking, {
+      title: "Kotans Barber",
+      body: action === "accept"
+        ? `${booking.date} ${booking.time} — confirmed`
+        : `${booking.date} — declined: ${patch.reason}`,
+      url: "/"
+    }).catch(() => {});
+
     res.json({ ok: true, booking });
   } catch (err) {
     next(err);
@@ -120,6 +131,30 @@ router.post("/blocked-ips", async (req, res, next) => {
 router.delete("/blocked-ips/:ip", async (req, res, next) => {
   try {
     await store.removeBlockedIp(req.params.ip);
+    res.json({ ok: true });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// Staff browsers register here from the admin panel to receive a push for
+// every new request. Without VAPID keys the subscription is simply stored.
+router.post("/push-subscriptions", async (req, res, next) => {
+  try {
+    const subscription = push.normalizeSubscription(req.body?.subscription || req.body);
+    if (!subscription) return res.status(400).json({ error: "validation" });
+    await store.addAdminSubscriber(subscription);
+    res.status(201).json({ ok: true, pushEnabled: push.enabled });
+  } catch (err) {
+    next(err);
+  }
+});
+
+router.delete("/push-subscriptions", async (req, res, next) => {
+  try {
+    const endpoint = String(req.body?.endpoint || "");
+    if (!endpoint) return res.status(400).json({ error: "validation" });
+    await store.removeAdminSubscriber(endpoint);
     res.json({ ok: true });
   } catch (err) {
     next(err);

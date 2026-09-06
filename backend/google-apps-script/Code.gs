@@ -18,16 +18,19 @@
  *    GOOGLE_SHEETS_URL. Paste the same API_TOKEN value into
  *    GOOGLE_SHEETS_TOKEN.
  * 6. Run the `setup` function once from the Apps Script editor (select it in
- *    the toolbar dropdown and click Run) so the three tabs and their headers
- *    get created. Re-running it later is safe, it won't erase data.
+ *    the toolbar dropdown and click Run) so the four tabs and their headers
+ *    get created. Re-running it later is safe: it never erases data, and it
+ *    adds any columns introduced by a newer version of this script.
  */
 
 const SHEETS = {
-  Bookings: ["id", "createdAt", "name", "age", "service", "date", "time", "endTime", "price", "status", "reason", "ip", "statusUpdatedAt"],
+  Bookings: ["id", "createdAt", "name", "age", "service", "date", "time", "endTime", "price", "status", "reason", "ip", "statusUpdatedAt", "locale", "pushEndpoint", "pushP256dh", "pushAuth"],
   BlockedIps: ["id", "ip", "reason", "bannedAt"],
   // id is the weekday number (0 = Sunday ... 6 = Saturday, matches JS Date#getDay()).
   // Empty open/close means the shop is closed that day.
-  Schedule: ["id", "open", "close"]
+  Schedule: ["id", "open", "close"],
+  // Browser push subscriptions registered from the admin panel.
+  AdminSubscribers: ["id", "endpoint", "p256dh", "auth", "createdAt"]
 };
 
 const DEFAULT_SCHEDULE_ROWS = [
@@ -47,6 +50,14 @@ function setup() {
     if (!sheet) sheet = ss.insertSheet(name);
     if (sheet.getLastRow() === 0) {
       sheet.appendRow(SHEETS[name]);
+      return;
+    }
+    // Sheets created by an older version of this script are topped up with the
+    // columns added since, so re-running setup never loses existing rows.
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    const missing = SHEETS[name].filter(function (header) { return headers.indexOf(header) === -1; });
+    if (missing.length) {
+      sheet.getRange(1, headers.length + 1, 1, missing.length).setValues([missing]);
     }
   });
 
@@ -138,6 +149,32 @@ function doPost(e) {
       return jsonResponse({ error: "not_found" });
     }
 
+    // Atomic booking: finding the free slot and writing the row happen under a
+    // script lock, so two people submitting at the same second cannot both be
+    // given the same time.
+    if (body.action === "reserve") {
+      const lock = LockService.getScriptLock();
+      lock.waitLock(30000);
+      try {
+        const data = body.data || {};
+        const reserve = body.reserve || {};
+        const time = findFreeSlot_(sheet, headers, data.date, reserve);
+        if (!time) return jsonResponse({ row: null });
+        const record = {};
+        Object.keys(data).forEach(function (key) { record[key] = data[key]; });
+        record.id = data.id !== undefined && data.id !== "" ? data.id : Utilities.getUuid();
+        record.time = time;
+        record.endTime = minutesToTime_(timeToMinutes_(time) + Number(reserve.durationMinutes));
+        const row = headers.map(function (h) { return record[h] !== undefined ? record[h] : ""; });
+        sheet.appendRow(row);
+        const result = {};
+        headers.forEach(function (h, i) { result[h] = row[i]; });
+        return jsonResponse({ row: result });
+      } finally {
+        lock.releaseLock();
+      }
+    }
+
     if (body.action === "delete") {
       const rows = sheet.getDataRange().getValues();
       const idCol = headers.indexOf("id");
@@ -154,4 +191,52 @@ function doPost(e) {
   } catch (err) {
     return jsonResponse({ error: String(err) });
   }
+}
+
+/**
+ * First gap of `durationMinutes` between open and close on `date`, ignoring
+ * rejected requests. Mirrors findNextSlot() in backend/src/scheduleUtils.js.
+ */
+function findFreeSlot_(sheet, headers, date, reserve) {
+  const durationMinutes = Number(reserve.durationMinutes);
+  const openMin = timeToMinutes_(reserve.open);
+  const closeMin = timeToMinutes_(reserve.close);
+  if (!durationMinutes || isNaN(openMin) || isNaN(closeMin)) return null;
+
+  const values = sheet.getDataRange().getValues();
+  const dateCol = headers.indexOf("date");
+  const statusCol = headers.indexOf("status");
+  const timeCol = headers.indexOf("time");
+  const endCol = headers.indexOf("endTime");
+
+  const busy = [];
+  for (let r = 1; r < values.length; r++) {
+    const row = values[r];
+    if (String(row[dateCol]) !== String(date)) continue;
+    const status = String(row[statusCol]);
+    if (status === "rejected" || status === "cancelled") continue;
+    const start = timeToMinutes_(row[timeCol]);
+    const end = timeToMinutes_(row[endCol]);
+    if (!isNaN(start) && !isNaN(end)) busy.push({ start: start, end: end });
+  }
+  busy.sort(function (a, b) { return a.start - b.start; });
+
+  let cursor = openMin;
+  for (let i = 0; i < busy.length; i++) {
+    if (cursor + durationMinutes <= busy[i].start) return minutesToTime_(cursor);
+    cursor = Math.max(cursor, busy[i].end);
+  }
+  return cursor + durationMinutes <= closeMin ? minutesToTime_(cursor) : null;
+}
+
+function timeToMinutes_(value) {
+  const parts = String(value).split(":");
+  if (parts.length < 2) return NaN;
+  return Number(parts[0]) * 60 + Number(parts[1]);
+}
+
+function minutesToTime_(value) {
+  const hours = Math.floor(value / 60);
+  const minutes = value % 60;
+  return (hours < 10 ? "0" : "") + hours + ":" + (minutes < 10 ? "0" : "") + minutes;
 }

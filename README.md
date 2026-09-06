@@ -15,9 +15,10 @@ npm start
 ```
 
 Open `http://localhost:4000/` — the backend serves the frontend itself, so
-`js/app.js`'s `fetch('/api/...')` calls work with no extra setup. See
-`backend/README.md` for connecting Google Sheets and for the alternative
-(frontend on Netlify + `netlify.toml` proxy to a separately hosted backend).
+`js/app.js`'s `fetch('/api/...')` calls work with no extra setup.
+`npm test` runs the API smoke tests. See `backend/README.md` for connecting
+Google Sheets, and `HOSTING.md` for publishing (Render/Railway, Netlify
+serverless, Docker, or a plain VPS).
 
 ## What's implemented, mapped to the brief
 
@@ -33,14 +34,28 @@ Open `http://localhost:4000/` — the backend serves the frontend itself, so
   `backend/README.md` for the placeholder slot length used for scheduling).
 - **Booking flow**: the client picks a service and one of the next seven
   available days, never an exact time — the backend assigns the first free
-  slot in that day's hours, and the admin then confirms or declines it.
+  slot in that day's hours, and the admin then confirms or declines it. Slot
+  search and write happen atomically (an Apps Script lock, or a single
+  synchronous read-write on the local store), so two people submitting at the
+  same second can never be given the same time.
+- **Hosting**: `Dockerfile`, `Procfile`, and a Netlify setup
+  (`netlify.toml` + `backend/netlify/functions/api.js`) that runs the same
+  Express app as one serverless function. Steps for each: `HOSTING.md`.
+- **Web Push (optional)**: with VAPID keys configured, the barber gets a push
+  for every new request and the client gets one when it is accepted or
+  declined; `sw.js` displays them. Without keys the notification buttons keep
+  working as plain in-browser permission prompts.
 
 ## Repository layout
 
 ```
 index.html, css/, js/, images/, media/   — responsive frontend
+sw.js                                     — push notification service worker
 backend/                                  — Express API + Apps Script
-netlify.toml                              — optional Netlify->backend proxy
+backend/netlify/functions/api.js          — the same API as a Netlify function
+scripts/build-static.js                   — collects the frontend into dist/
+Dockerfile, Procfile, netlify.toml        — deployment targets
+HOSTING.md                                — step-by-step publishing guide
 ```
 
 ## Still needed before launch
